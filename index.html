@@ -432,23 +432,6 @@ document.getElementById("btn-start").addEventListener("click", function () {
   if (arSystem && typeof arSystem.start === 'function') {
     arSystem.start().then(() => {
       console.log('MindAR iniciado tras pulsar Iniciar');
-      // Diagnóstico: mostrar información de elementos <video> y forzar estilo si se detecta la cámara
-      setTimeout(() => {
-        const videos = Array.from(document.querySelectorAll('video'));
-        console.log('videos encontrados:', videos.length, videos);
-        videos.forEach((v, i) => {
-          console.log(i, 'id:', v.id, 'paused:', v.paused, 'readyState:', v.readyState, 'srcObject:', v.srcObject);
-          // Aplicar estilo para que el video ocupe el fondo y quede detrás del canvas
-          v.style.position = 'fixed';
-          v.style.inset = '0';
-          v.style.width = '100%';
-          v.style.height = '100%';
-          v.style.objectFit = 'cover';
-          v.style.zIndex = '0';
-        });
-        const sceneEl = document.querySelector('a-scene');
-        if (sceneEl) sceneEl.style.zIndex = '1';
-      }, 200);
     }).catch(err => {
       console.warn('Error iniciando MindAR:', err);
     });
