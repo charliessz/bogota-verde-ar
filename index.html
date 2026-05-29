@@ -428,6 +428,19 @@ document.getElementById("btn-start").addEventListener("click", function () {
   container.style.display = "block";
   hintEl.style.display = "block";
   btnQR.style.display = "block";
+  // Intentar iniciar MindAR después del gesto del usuario
+  const sceneEl = document.querySelector('a-scene');
+  if (!sceneEl) return console.warn('a-scene no encontrado para iniciar MindAR');
+  const arSystem = sceneEl.systems && sceneEl.systems['mindar-image-system'];
+  if (arSystem && typeof arSystem.start === 'function') {
+    arSystem.start().then(() => {
+      console.log('MindAR iniciado tras pulsar Iniciar');
+    }).catch(err => {
+      console.warn('Error iniciando MindAR:', err);
+    });
+  } else {
+    console.warn('MindAR system no disponible en este momento');
+  }
 });
 
 // ══ QR ══
