@@ -173,6 +173,33 @@
 </head>
 <body>
 
+<!-- Pantalla de inicio -->
+<div id="start-screen" style="
+  position: fixed; inset: 0; z-index: 100;
+  background: #0a1a0a;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px; padding: 32px; text-align: center;
+">
+  <div style="font-size: 3rem;">🌿</div>
+  <h1 style="color: #69f0ae; font-size: 1.4rem; font-weight: 700;">Bogotá Verde AR</h1>
+  <p style="color: #c8e6c9; font-size: 0.85rem; max-width: 280px; line-height: 1.6;">
+    Experiencia de Realidad Aumentada para conocer y cuidar los parques y espacios públicos de Bogotá.
+  </p>
+  <p style="color: #a5d6a7; font-size: 0.78rem;">
+    Se necesita acceso a la cámara para continuar.
+  </p>
+  <button id="btn-start" style="
+    background: #1b5e20; color: #fff; border: none;
+    padding: 14px 36px; border-radius: 999px;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(105,240,174,0.3);
+  ">
+    📷 Iniciar experiencia
+  </button>
+  <p style="color: #4a7c5a; font-size: 0.7rem;">Universidad Manuela Beltrán — Diseño de Interfaces 2026</p>
+</div>
+
 <!-- Botón QR siempre visible -->
 <button id="btn-qr">📱 QR</button>
 
@@ -223,7 +250,7 @@
 
 <!-- ─── ESCENA AR ─── -->
 <a-scene
-  mindar-image="imageTargetSrc: ./targets.mind; uiScanning:no; uiLoading:no; uiError:no;"
+  mindar-image="imageTargetSrc: ./targets.mind; uiScanning:no; uiLoading:no; uiError:no; autoStart: false;"
   color-space="sRGB"
   renderer="colorManagement: true, physicallyCorrectLights: true"
   vr-mode-ui="enabled: false"
@@ -538,6 +565,43 @@ qrClose.addEventListener("click", () => qrOverlay.classList.remove("visible"));
 qrOverlay.addEventListener("click", e => {
   if (e.target === qrOverlay) qrOverlay.classList.remove("visible");
 });
+
+// ─── Pantalla de inicio: iniciar MindAR tras user gesture ───
+(function () {
+  const btnStart = document.getElementById("btn-start");
+  const startScreen = document.getElementById("start-screen");
+  if (!btnStart) return;
+
+  btnStart.addEventListener("click", async function () {
+    if (startScreen) startScreen.style.display = "none";
+
+    const sceneEl = document.querySelector("a-scene");
+    if (!sceneEl) return console.warn("a-scene no encontrado");
+
+    const startMindAR = async () => {
+      const arSystem = sceneEl.systems["mindar-image-system"];
+      if (arSystem && typeof arSystem.start === "function") {
+        try {
+          await arSystem.start();
+          console.log("MindAR iniciado tras user gesture");
+        } catch (err) {
+          console.warn("Error al iniciar MindAR:", err);
+        }
+      } else {
+        console.warn("MindAR system no disponible para iniciar aún");
+      }
+    };
+
+    if (sceneEl.hasLoaded) {
+      startMindAR();
+    } else {
+      sceneEl.addEventListener("loaded", function onLoaded() {
+        sceneEl.removeEventListener("loaded", onLoaded);
+        startMindAR();
+      });
+    }
+  });
+})();
 </script>
 </body>
 </html>
