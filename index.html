@@ -128,7 +128,9 @@
 <body>
   <!-- Menú interactivo -->
   <div id="menu">
-    <button data-section="mapa">Mapa</button>
+    <button data-park="simon">Simón Bolívar</button>
+    <button data-park="nacional">Parque Nacional</button>
+    <button data-park="tunal">Parque El Tunal</button>
     <button data-section="info">Información</button>
     <button data-section="historia">Historia</button>
     <button data-section="cuidado">Cuidado ambiental</button>
@@ -173,163 +175,174 @@
 
     <!-- Contenido anclado al marcador (targetIndex: 0) -->
     <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
-      <!-- Suelo del parque -->
-      <a-plane
-        position="0 0 0"
-        rotation="-90 0 0"
-        width="1.2"
-        height="1.2"
-        color="#4caf50"
-      ></a-plane>
 
-      <!-- Camineras -->
-      <a-box
-        position="0 0.01 0"
-        width="0.2"
-        height="0.01"
-        depth="1.2"
-        color="#c8c8c8"
-      ></a-box>
+      <!-- Parque Simón Bolívar -->
+      <a-entity id="parque-simon" visible="false">
+        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#66bb6a"></a-plane>
+        <a-cylinder position="-0.35 0.15 -0.2" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
+        <a-sphere position="-0.35 0.35 -0.2" radius="0.12" color="#2e7d32"></a-sphere>
+        <a-cylinder position="0.35 0.15 0.2" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
+        <a-sphere position="0.35 0.35 0.2" radius="0.12" color="#2e7d32"></a-sphere>
+        <a-box position="0 0.03 0" width="0.2" height="0.04" depth="0.8" color="#bdbdbd"></a-box>
+        <a-text value="Parque Simon Bolivar" position="-0.25 0.28 0.3" width="0.8" color="#ffffff"></a-text>
+      </a-entity>
 
-      <!-- Árboles (cilindro + esfera) -->
-      <a-cylinder position="-0.4 0.15 -0.2" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
-      <a-sphere position="-0.4 0.35 -0.2" radius="0.12" color="#2e7d32"></a-sphere>
+      <!-- Parque Nacional -->
+      <a-entity id="parque-nacional" visible="false">
+        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#81c784"></a-plane>
+        <a-cylinder position="-0.25 0.15 -0.25" radius="0.03" height="0.3" color="#795548"></a-cylinder>
+        <a-sphere position="-0.25 0.35 -0.25" radius="0.12" color="#388e3c"></a-sphere>
+        <a-cylinder position="0.25 0.15 0.25" radius="0.03" height="0.3" color="#795548"></a-cylinder>
+        <a-sphere position="0.25 0.35 0.25" radius="0.12" color="#388e3c"></a-sphere>
+        <a-box position="-0.2 0.05 0.15" width="0.2" height="0.08" depth="0.08" color="#5d4037"></a-box>
+        <a-box position="0.2 0.05 -0.15" width="0.2" height="0.08" depth="0.08" color="#5d4037"></a-box>
+        <a-text value="Parque Nacional" position="-0.22 0.28 0.3" width="0.7" color="#ffffff"></a-text>
+      </a-entity>
 
-      <a-cylinder position="0.4 0.15 0.3" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
-      <a-sphere position="0.4 0.35 0.3" radius="0.12" color="#2e7d32"></a-sphere>
+      <!-- Parque El Tunal -->
+      <a-entity id="parque-tunal" visible="false">
+        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#4caf50"></a-plane>
+        <a-cylinder position="-0.4 0.15 0" radius="0.03" height="0.3" color="#6d4c41"></a-cylinder>
+        <a-sphere position="-0.4 0.35 0" radius="0.12" color="#1b5e20"></a-sphere>
+        <a-cylinder position="0.4 0.15 0" radius="0.03" height="0.3" color="#6d4c41"></a-cylinder>
+        <a-sphere position="0.4 0.35 0" radius="0.12" color="#1b5e20"></a-sphere>
+        <a-cylinder position="0 0.08 -0.3" radius="0.05" height="0.16" color="#1565c0"></a-cylinder>
+        <a-cylinder position="0.12 0.08 -0.3" radius="0.05" height="0.16" color="#f9a825"></a-cylinder>
+        <a-text value="Parque El Tunal" position="-0.22 0.28 0.3" width="0.7" color="#ffffff"></a-text>
+      </a-entity>
 
-      <!-- Bancas -->
-      <a-box position="-0.2 0.05 0.3" width="0.25" height="0.05" depth="0.1" color="#5d4037"></a-box>
-      <a-box position="-0.2 0.09 0.3" width="0.25" height="0.02" depth="0.1" color="#795548"></a-box>
-
-      <a-box position="0.2 0.05 -0.3" width="0.25" height="0.05" depth="0.1" color="#5d4037"></a-box>
-      <a-box position="0.2 0.09 -0.3" width="0.25" height="0.02" depth="0.1" color="#795548"></a-box>
-
-      <!-- Canecas -->
-      <a-cylinder position="0 0.08 -0.4" radius="0.04" height="0.16" color="#1565c0"></a-cylinder>
-      <a-cylinder position="0.1 0.08 -0.4" radius="0.04" height="0.16" color="#f9a825"></a-cylinder>
-      <a-cylinder position="-0.1 0.08 -0.4" radius="0.04" height="0.16" color="#c62828"></a-cylinder>
-
-      <!-- Señal informativa "Parque Bogotá Verde" -->
-      <a-box position="0 0.18 0.4" width="0.35" height="0.18" depth="0.02" color="#263238"></a-box>
-      <a-text
-        value="Parque Bogotá Verde"
-        position="-0.16 0.22 0.39"
-        width="0.7"
-        color="#ffffff"
-      ></a-text>
-
-      <!-- Ícono flotante (información) -->
-      <a-sphere
-        id="icono-info"
-        position="0 0.4 0"
-        radius="0.05"
-        color="#ffca28"
-        animation="property: position; to: 0 0.45 0; dir: alternate; loop: true; dur: 1000"
-      ></a-sphere>
     </a-entity>
   </a-scene>
 
   <script>
-    // Contenido de cada sección del menú
-    const sections = {
-      mapa: {
-        title: "Mapa de parques",
-        body:
-          "Explora parques como el Simón Bolívar, Parque Nacional y Tunal. Este prototipo representa un parque genérico de Bogotá."
-      },
-      info: {
-        title: "Información del lugar",
-        body:
-          "Nombre: Parque Bogotá Verde (prototipo). Aquí puedes caminar, hacer deporte, compartir en familia y conectarte con la naturaleza."
-      },
-      historia: {
-        title: "Historia y cultura ciudadana",
-        body:
-          "Los parques de Bogotá son espacios clave para la cultura, los conciertos, ferias y encuentros ciudadanos. Promueven el respeto y la convivencia."
-      },
-      cuidado: {
-        title: "Cuidado ambiental",
-        body:
-          "Usa las canecas de colores para separar residuos, cuida el césped y los árboles, respeta la fauna urbana y evita generar ruido excesivo."
-      },
-      normas: {
-        title: "Normas de uso del espacio público",
-        body:
-          "Respeta las zonas peatonales, no dañes el mobiliario, controla tus mascotas, usa las ciclorrutas correctamente y evita actividades que deterioren el parque."
-      },
-      seguridad: {
-        title: "Recomendaciones de seguridad",
-        body:
-          "Cuida tus objetos personales, no permanezcas en zonas solas en la noche, sigue la señalización e identifica puntos de encuentro con tus acompañantes."
-      },
-      quiz: {
-        title: "Quiz: cuidado del parque",
-        body:
-          "¿Cuál de estas acciones es la más adecuada para cuidar el parque?"
-      }
-    };
-
     const infoTitle = document.getElementById("info-title");
     const infoBody = document.getElementById("info-body");
     const quizOptions = document.getElementById("quiz-options");
     const quizFeedback = document.getElementById("quiz-feedback");
 
-    // Manejo de clic en botones del menú
+    const parks = {
+      simon: document.getElementById("parque-simon"),
+      nacional: document.getElementById("parque-nacional"),
+      tunal: document.getElementById("parque-tunal")
+    };
+
+    const parkInfo = {
+      simon: {
+        title: "Parque Simón Bolívar",
+        body: "Uno de los parques más representativos de Bogotá. Es reconocido por sus zonas verdes, lago, espacios para recreación y grandes eventos."
+      },
+      nacional: {
+        title: "Parque Nacional",
+        body: "Espacio tradicional de la ciudad, con valor histórico, cultural y ambiental. Es ideal para caminar, descansar y encontrarse con la naturaleza."
+      },
+      tunal: {
+        title: "Parque El Tunal",
+        body: "Parque urbano importante del sur de Bogotá, con áreas para deporte, recreación y actividades en familia."
+      }
+    };
+
+    const sections = {
+      info: {
+        title: "Información del lugar",
+        body: "Selecciona un parque desde el menú para visualizarlo en realidad aumentada."
+      },
+      historia: {
+        title: "Historia y cultura ciudadana",
+        body: "Los parques de Bogotá son espacios clave para la cultura, los conciertos, ferias y encuentros ciudadanos. Promueven el respeto y la convivencia."
+      },
+      cuidado: {
+        title: "Cuidado ambiental",
+        body: "Usa las canecas de colores para separar residuos, cuida el césped y los árboles, respeta la fauna urbana y evita generar ruido excesivo."
+      },
+      normas: {
+        title: "Normas de uso del espacio público",
+        body: "Respeta las zonas peatonales, no dañes el mobiliario, controla tus mascotas, usa las ciclorrutas correctamente y evita actividades que deterioren el parque."
+      },
+      seguridad: {
+        title: "Recomendaciones de seguridad",
+        body: "Cuida tus objetos personales, no permanezcas en zonas solas en la noche, sigue la señalización e identifica puntos de encuentro con tus acompañantes."
+      },
+      quiz: {
+        title: "Quiz: cuidado del parque",
+        body: "¿Cuál de estas acciones es la más adecuada para cuidar el parque?"
+      }
+    };
+
+    function hideAllParks() {
+      Object.values(parks).forEach((park) => {
+        park.setAttribute("visible", "false");
+      });
+    }
+
+    function showPark(parkKey) {
+      hideAllParks();
+      parks[parkKey].setAttribute("visible", "true");
+      infoTitle.textContent = parkInfo[parkKey].title;
+      infoBody.textContent = parkInfo[parkKey].body;
+      quizOptions.style.display = "none";
+      quizFeedback.textContent = "";
+    }
+
     document.querySelectorAll("#menu button").forEach((btn) => {
       btn.addEventListener("click", () => {
+        const park = btn.getAttribute("data-park");
         const section = btn.getAttribute("data-section");
-        const data = sections[section];
 
-        infoTitle.textContent = data.title;
-        infoBody.textContent = data.body;
+        if (park) {
+          showPark(park);
+          return;
+        }
 
-        if (section === "quiz") {
-          quizOptions.style.display = "flex";
-          quizFeedback.textContent = "";
-        } else {
-          quizOptions.style.display = "none";
-          quizFeedback.textContent = "";
+        if (section) {
+          const data = sections[section];
+          infoTitle.textContent = data.title;
+          infoBody.textContent = data.body;
+
+          if (section === "quiz") {
+            quizOptions.style.display = "flex";
+            quizFeedback.textContent = "";
+          } else {
+            quizOptions.style.display = "none";
+            quizFeedback.textContent = "";
+          }
         }
       });
     });
 
-    // Manejo de respuestas del quiz
     quizOptions.querySelectorAll("button").forEach((btn) => {
       btn.addEventListener("click", () => {
         const answer = btn.getAttribute("data-answer");
         if (answer === "b") {
-          quizFeedback.textContent =
-            "✅ Correcto: separar residuos y usar canecas ayuda a cuidar el parque.";
+          quizFeedback.textContent = "✅ Correcto: separar residuos y usar canecas ayuda a cuidar el parque.";
           quizFeedback.style.color = "#81c784";
         } else {
-          quizFeedback.textContent =
-            "❌ Revisa de nuevo. Piensa en cómo tus acciones impactan el medio ambiente.";
+          quizFeedback.textContent = "❌ Revisa de nuevo. Piensa en cómo tus acciones impactan el medio ambiente.";
           quizFeedback.style.color = "#ef9a9a";
         }
       });
     });
+
     document.addEventListener("DOMContentLoaded", () => {
-    const target = document.getElementById("ar-target");
-    const menuEl = document.getElementById("menu");
-    const infoPanelEl = document.getElementById("info-panel");
+      const target = document.getElementById("ar-target");
+      const menuEl = document.getElementById("menu");
+      const infoPanelEl = document.getElementById("info-panel");
 
-    if (!target) return;
+      if (!target) return;
 
-    // Cuando el marcador se detecta
-    target.addEventListener("targetFound", () => {
-      console.log("Marcador detectado");
-      menuEl.style.display = "flex";
-      infoPanelEl.style.display = "block";
+      target.addEventListener("targetFound", () => {
+        menuEl.style.display = "flex";
+        infoPanelEl.style.display = "block";
+        infoTitle.textContent = "Bogotá Verde AR";
+        infoBody.textContent = "Selecciona un parque desde el menú para visualizarlo en realidad aumentada.";
+        hideAllParks();
+      });
+
+      target.addEventListener("targetLost", () => {
+        menuEl.style.display = "none";
+        infoPanelEl.style.display = "none";
+        hideAllParks();
+      });
     });
-
-    // Cuando el marcador se pierde
-    target.addEventListener("targetLost", () => {
-      console.log("Marcador perdido");
-      menuEl.style.display = "none";
-      infoPanelEl.style.display = "none";
-    });
-  });
   </script>
 </body>
 </html>
