@@ -166,6 +166,12 @@
     device-orientation-permission-ui="enabled: false"
     embedded
   >
+    <a-assets>
+      <a-asset-item id="modelo-simon" src="./assets/modelos/parque-simon.glb"></a-asset-item>
+      <a-asset-item id="modelo-nacional" src="./assets/modelos/parque-nacional.glb"></a-asset-item>
+      <a-asset-item id="modelo-tunal" src="./assets/modelos/parque-tunal.glb"></a-asset-item>
+    </a-assets>
+
     <!-- Cámara AR -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
@@ -178,37 +184,32 @@
 
       <!-- Parque Simón Bolívar -->
       <a-entity id="parque-simon" visible="false">
-        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#66bb6a"></a-plane>
-        <a-cylinder position="-0.35 0.15 -0.2" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
-        <a-sphere position="-0.35 0.35 -0.2" radius="0.12" color="#2e7d32"></a-sphere>
-        <a-cylinder position="0.35 0.15 0.2" radius="0.03" height="0.3" color="#8d6e63"></a-cylinder>
-        <a-sphere position="0.35 0.35 0.2" radius="0.12" color="#2e7d32"></a-sphere>
-        <a-box position="0 0.03 0" width="0.2" height="0.04" depth="0.8" color="#bdbdbd"></a-box>
-        <a-text value="Parque Simon Bolivar" position="-0.25 0.28 0.3" width="0.8" color="#ffffff"></a-text>
+        <a-entity
+          gltf-model="#modelo-simon"
+          position="0 0.05 0"
+          rotation="0 180 0"
+          scale="0.45 0.45 0.45"
+        ></a-entity>
       </a-entity>
 
       <!-- Parque Nacional -->
       <a-entity id="parque-nacional" visible="false">
-        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#81c784"></a-plane>
-        <a-cylinder position="-0.25 0.15 -0.25" radius="0.03" height="0.3" color="#795548"></a-cylinder>
-        <a-sphere position="-0.25 0.35 -0.25" radius="0.12" color="#388e3c"></a-sphere>
-        <a-cylinder position="0.25 0.15 0.25" radius="0.03" height="0.3" color="#795548"></a-cylinder>
-        <a-sphere position="0.25 0.35 0.25" radius="0.12" color="#388e3c"></a-sphere>
-        <a-box position="-0.2 0.05 0.15" width="0.2" height="0.08" depth="0.08" color="#5d4037"></a-box>
-        <a-box position="0.2 0.05 -0.15" width="0.2" height="0.08" depth="0.08" color="#5d4037"></a-box>
-        <a-text value="Parque Nacional" position="-0.22 0.28 0.3" width="0.7" color="#ffffff"></a-text>
+        <a-entity
+          gltf-model="#modelo-nacional"
+          position="0 0.05 0"
+          rotation="0 180 0"
+          scale="0.45 0.45 0.45"
+        ></a-entity>
       </a-entity>
 
       <!-- Parque El Tunal -->
       <a-entity id="parque-tunal" visible="false">
-        <a-plane position="0 0 0" rotation="-90 0 0" width="1.2" height="1.2" color="#4caf50"></a-plane>
-        <a-cylinder position="-0.4 0.15 0" radius="0.03" height="0.3" color="#6d4c41"></a-cylinder>
-        <a-sphere position="-0.4 0.35 0" radius="0.12" color="#1b5e20"></a-sphere>
-        <a-cylinder position="0.4 0.15 0" radius="0.03" height="0.3" color="#6d4c41"></a-cylinder>
-        <a-sphere position="0.4 0.35 0" radius="0.12" color="#1b5e20"></a-sphere>
-        <a-cylinder position="0 0.08 -0.3" radius="0.05" height="0.16" color="#1565c0"></a-cylinder>
-        <a-cylinder position="0.12 0.08 -0.3" radius="0.05" height="0.16" color="#f9a825"></a-cylinder>
-        <a-text value="Parque El Tunal" position="-0.22 0.28 0.3" width="0.7" color="#ffffff"></a-text>
+        <a-entity
+          gltf-model="#modelo-tunal"
+          position="0 0.05 0"
+          rotation="0 180 0"
+          scale="0.45 0.45 0.45"
+        ></a-entity>
       </a-entity>
 
     </a-entity>
