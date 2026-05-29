@@ -332,40 +332,7 @@
       });
     });
 
-    // Auto-escala segura para MindAR + A-Frame
-    function autoEscalarModelo(entityId) {
-      const el = document.getElementById(entityId);
-      if (!el) return;
-
-      el.addEventListener("model-loaded", function () {
-        const mesh = this.getObject3D("mesh");
-        if (!mesh) return;
-
-        const box = new THREE.Box3().setFromObject(mesh);
-        const size = new THREE.Vector3();
-        box.getSize(size);
-
-        const maxDim = Math.max(size.x, size.y, size.z);
-        if (maxDim === 0) return;
-
-        const targetSize = 0.4;
-        const factor = targetSize / maxDim;
-
-        this.object3D.scale.set(factor, factor, factor);
-
-        const center = new THREE.Vector3();
-        box.getCenter(center);
-        this.object3D.position.set(-center.x * factor, -center.y * factor, 0);
-
-        console.log(`${entityId} escalado con factor: ${factor}`);
-      });
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
-      autoEscalarModelo("modelo-simon-entity");
-      autoEscalarModelo("modelo-nacional-entity");
-      autoEscalarModelo("modelo-tunal-entity");
-
       const target = document.getElementById("ar-target");
       const menuEl = document.getElementById("menu");
       const infoPanelEl = document.getElementById("info-panel");
