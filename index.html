@@ -231,9 +231,9 @@
   embedded
 >
   <a-assets timeout="15000">
-    <a-asset-item id="modelo-simon"    src="./assets/parque-simon.glb"></a-asset-item>
-    <a-asset-item id="modelo-nacional" src="./assets/parque-nacional.glb"></a-asset-item>
-    <a-asset-item id="modelo-tunal"    src="./assets/parque-tunal.glb"></a-asset-item>
+    <a-asset-item id="modelo-simon"    src="./assets/modelos/parque-simon.glb"></a-asset-item>
+    <a-asset-item id="modelo-nacional" src="./assets/modelos/parque-nacional.glb"></a-asset-item>
+    <a-asset-item id="modelo-tunal"    src="./assets/modelos/parque-tunal.glb"></a-asset-item>
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -386,10 +386,13 @@ function ocultarParques() {
 // ─── Mostrar parque con animación ───
 function mostrarParque(key) {
   ocultarParques();
+  if (!parks[key]) return console.warn('Parque no encontrado:', key);
   parks[key].setAttribute("visible", true);
   // Disparar animación de aparición
   setTimeout(() => {
-    modelEntities[key].emit("aparecer");
+    if (modelEntities[key]) {
+      modelEntities[key].emit("aparecer");
+    }
   }, 50);
   parqueActivo = key;
   document.querySelector(`[data-park="${key}"]`).classList.add("activo");
