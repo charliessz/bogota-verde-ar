@@ -43,6 +43,18 @@
     #ar-container { display: none; position: fixed; inset: 0; }
     a-scene { position: fixed; inset: 0; }
 
+    /* Forzar transparencia del canvas para que se vea la cámara detrás del renderer */
+    a-scene, a-scene canvas, canvas, .a-canvas {
+      background: transparent !important;
+    }
+    a-scene .a-canvas, a-scene canvas {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1 !important;
+    }
+
     /* ── Menú ── */
     #menu {
       position: fixed; top: 0; left: 0; right: 0;
@@ -432,6 +444,15 @@ document.getElementById("btn-start").addEventListener("click", function () {
   if (arSystem && typeof arSystem.start === 'function') {
     arSystem.start().then(() => {
       console.log('MindAR iniciado tras pulsar Iniciar');
+      // Forzar transparencia en el renderer (Three.js) para asegurar que el canvas sea transparente
+      try {
+        if (sceneEl && sceneEl.renderer && typeof sceneEl.renderer.setClearColor === 'function') {
+          sceneEl.renderer.setClearColor(0x000000, 0);
+          console.log('Renderer clearColor seteado a transparente');
+        }
+      } catch (e) {
+        console.warn('No se pudo setear clearColor del renderer:', e);
+      }
       // Diagnóstico: mostrar información de elementos <video> y forzar estilo si se detecta la cámara
       setTimeout(() => {
         const videos = Array.from(document.querySelectorAll('video'));
