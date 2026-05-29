@@ -139,6 +139,14 @@
     <button data-section="quiz">Quiz</button>
   </div>
 
+  <!-- Botón temporal para pruebas de modelo -->
+  <button
+    id="boton-test-simon"
+    onclick="document.getElementById('parque-simon').setAttribute('visible', true)"
+    style="position:fixed; bottom:80px; left:10px; z-index:999; padding:10px 12px; background:#d32f2f; color:#fff; border:none; border-radius:8px; font-size:0.8rem;">
+    TEST: Mostrar Simón
+  </button>
+
   <!-- Panel de información dinámico -->
   <div id="info-panel">
     <div id="info-title">Bogotá Verde AR</div>
@@ -166,7 +174,7 @@
     device-orientation-permission-ui="enabled: false"
     embedded
   >
-    <a-assets>
+    <a-assets timeout="10000">
       <a-asset-item id="modelo-simon" src="./assets/modelos/parque-simon.glb"></a-asset-item>
       <a-asset-item id="modelo-nacional" src="./assets/modelos/parque-nacional.glb"></a-asset-item>
       <a-asset-item id="modelo-tunal" src="./assets/modelos/parque-tunal.glb"></a-asset-item>
@@ -189,7 +197,6 @@
           gltf-model="#modelo-simon"
           position="0 0 0"
           rotation="0 180 0"
-          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
@@ -200,7 +207,6 @@
           gltf-model="#modelo-nacional"
           position="0 0 0"
           rotation="0 180 0"
-          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
@@ -211,7 +217,6 @@
           gltf-model="#modelo-tunal"
           position="0 0 0"
           rotation="0 180 0"
-          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
@@ -326,30 +331,45 @@
       });
     });
 
-    document.querySelectorAll("[gltf-model]").forEach(function (el) {
-      el.addEventListener("model-loaded", function () {
-        const object3D = el.getObject3D("mesh");
-        if (!object3D) return;
+    // Auto-escala segura para MindAR + A-Frame
+    function autoEscalarModelo(entityId) {
+      const el = document.getElementById(entityId);
+      if (!el) return;
 
-        const box = new THREE.Box3().setFromObject(object3D);
+      el.addEventListener("model-loaded", function () {
+        const mesh = this.getObject3D("mesh");
+        if (!mesh) return;
+
+        const box = new THREE.Box3().setFromObject(mesh);
         const size = new THREE.Vector3();
         box.getSize(size);
 
         const maxDim = Math.max(size.x, size.y, size.z);
-        const targetSize = 0.5;
-        const scaleFactor = targetSize / maxDim;
+        if (maxDim === 0) return;
 
-        el.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+        const targetSize = 0.4;
+        const factor = targetSize / maxDim;
+
+        this.object3D.scale.set(factor, factor, factor);
 
         const center = new THREE.Vector3();
         box.getCenter(center);
-        el.setAttribute("position", `${-center.x * scaleFactor} ${-center.y * scaleFactor} 0`);
+        this.object3D.position.set(-center.x * factor, -center.y * factor, 0);
 
-        console.log(`Modelo escalado a factor: ${scaleFactor}`);
+        console.log(`${entityId} escalado con factor: ${factor}`);
       });
-    });
+    }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
+      autoEscalarModelo("modelo-simon-entity");
+      autoEscalarModelo("modelo-nacional-entity");
+      autoEscalarModelo("modelo-tunal-entity");
+
+      const target = document.getElementById("ar-target");
+      const menuEl = document.getElementById("menu");
+      const infoPanelEl = document.getElementById("info-panel");
+
+      if (!target) return;
       const target = document.getElementById("ar-target");
       const menuEl = document.getElementById("menu");
       const infoPanelEl = document.getElementById("info-panel");
