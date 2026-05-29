@@ -24,12 +24,11 @@
       top: 0;
       left: 0;
       right: 0;
-      display: flex;
+      display: none;              /* ANTES: display: flex; */
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 6px;
       padding: 8px;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(6px);
+      background: #0b1720;
       z-index: 10;
     }
 
@@ -72,7 +71,8 @@
       font-size: 0.8rem;
       line-height: 1.4;
       z-index: 10;
-    }
+      display: none;              /* ANTES: sin display (visible) */
+     }
 
     #info-title {
       font-weight: 700;
@@ -160,7 +160,7 @@
     <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
     <!-- Contenido anclado al marcador (targetIndex: 0) -->
-    <a-entity mindar-image-target="targetIndex: 0">
+    <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
       <!-- Suelo del parque -->
       <a-plane
         position="0 0 0"
@@ -297,6 +297,27 @@
         }
       });
     });
+    document.addEventListener("DOMContentLoaded", () => {
+    const target = document.getElementById("ar-target");
+    const menuEl = document.getElementById("menu");
+    const infoPanelEl = document.getElementById("info-panel");
+
+    if (!target) return;
+
+    // Cuando el marcador se detecta
+    target.addEventListener("targetFound", () => {
+      console.log("Marcador detectado");
+      menuEl.style.display = "flex";
+      infoPanelEl.style.display = "block";
+    });
+
+    // Cuando el marcador se pierde
+    target.addEventListener("targetLost", () => {
+      console.log("Marcador perdido");
+      menuEl.style.display = "none";
+      infoPanelEl.style.display = "none";
+    });
+  });
   </script>
 </body>
 </html>
