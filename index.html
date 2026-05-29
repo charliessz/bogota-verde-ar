@@ -3,358 +3,538 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bogotá Verde AR - MVP</title>
+  <title>Bogotá Verde AR</title>
 
-  <!-- A-Frame y MindAR (image tracking) -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
+  <!-- QRCode.js para generar el QR -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
   <style>
+    /* ─── Reset & base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-
-    body {
-      height: 100dvh;
+      width: 100%; height: 100dvh;
       overflow: hidden;
+      background: #0a1a0a;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #000;
-      color: #f5f5f5;
+      color: #f0f0f0;
     }
 
-    /* Asegura que A-Frame/MindAR ocupen toda la pantalla */
-    a-scene {
-      position: fixed;
-      inset: 0;
-    }
+    a-scene { position: fixed; inset: 0; }
 
-    /* Contenedor del menú superior */
+    /* ─── Menú superior ─── */
     #menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: none;              /* ANTES: display: flex; */
-      flex-wrap: wrap;
-      gap: 6px;
+      position: fixed; top: 0; left: 0; right: 0;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
       padding: 8px;
-      background: #0b1720;
-      z-index: 10;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      z-index: 20;
     }
 
-    #menu button {
+    #menu-row {
+      display: flex; flex-wrap: wrap; gap: 4px;
+    }
+
+    /* Selector de parques */
+    #park-row {
+      display: flex; flex-wrap: wrap; gap: 4px;
+    }
+
+    .btn-park {
       flex: 1 1 auto;
-      min-width: 90px;
-      padding: 6px 8px;
-      border: none;
+      padding: 7px 8px;
+      border: 2px solid transparent;
       border-radius: 999px;
       background: #1b5e20;
       color: #fff;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
       white-space: nowrap;
     }
+    .btn-park:hover { background: #2e7d32; transform: translateY(-1px); }
+    .btn-park:active { transform: translateY(1px); }
+    .btn-park.activo { border-color: #69f0ae; background: #2e7d32; }
 
-    #menu button:hover {
-      background: #2e7d32;
-      transform: translateY(-1px);
+    /* Botones de sección */
+    .btn-sec {
+      flex: 1 1 auto;
+      padding: 6px 8px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      color: #e0f2e9;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
     }
+    .btn-sec:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+    .btn-sec:active { transform: translateY(1px); }
+    .btn-sec.activo { background: #1b5e20; color: #fff; }
 
-    #menu button:active {
-      transform: translateY(1px);
-      background: #255d27;
-    }
-
-    /* Panel de información */
+    /* ─── Panel inferior ─── */
     #info-panel {
-      position: fixed;
-      left: 50%;
-      bottom: 8px;
+      position: fixed; left: 50%; bottom: 12px;
       transform: translateX(-50%);
-      max-width: 90vw;
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      color: #f5f5f5;
-      font-size: 0.8rem;
-      line-height: 1.4;
-      z-index: 10;
-      display: none;              /* ANTES: sin display (visible) */
-     }
+      max-width: 92vw; width: 92vw;
+      max-height: 42vh;
+      overflow-y: auto;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      z-index: 20;
+      display: none;
+      transition: opacity 0.3s;
+    }
 
     #info-title {
-      font-weight: 700;
-      margin-bottom: 4px;
-      font-size: 0.9rem;
+      font-weight: 700; font-size: 0.92rem;
+      margin-bottom: 5px; color: #69f0ae;
     }
+    #info-body { color: #e0f0e6; }
 
+    /* Quiz */
     #quiz-options {
-      margin-top: 6px;
-      display: none;
-      gap: 4px;
-      flex-wrap: wrap;
+      margin-top: 8px; display: none;
+      flex-direction: column; gap: 5px;
     }
-
-    #quiz-options button {
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid #1b5e20;
+    .quiz-btn {
+      padding: 6px 10px;
+      border: 1px solid #388e3c;
+      border-radius: 8px;
       background: #0c1a0e;
-      color: #fff;
+      color: #c8e6c9;
       font-size: 0.75rem;
       cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .quiz-btn:hover { background: #1b5e20; }
+    #quiz-feedback { margin-top: 6px; font-size: 0.75rem; font-weight: 600; }
+
+    /* QR modal */
+    #qr-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 50;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+    }
+    #qr-overlay.visible { display: flex; }
+    #qr-box {
+      background: #fff; padding: 16px; border-radius: 12px;
+    }
+    #qr-label {
+      color: #fff; font-size: 0.85rem; text-align: center; max-width: 240px;
+    }
+    #qr-close {
+      background: #1b5e20; color: #fff; border: none;
+      padding: 8px 24px; border-radius: 999px;
+      font-size: 0.85rem; cursor: pointer;
     }
 
-    #quiz-feedback {
-      margin-top: 4px;
-      font-size: 0.75rem;
+    /* Botón QR flotante */
+    #btn-qr {
+      position: fixed; top: 8px; right: 8px;
+      background: #1b5e20; color: #fff;
+      border: none; border-radius: 999px;
+      padding: 6px 12px; font-size: 0.72rem;
+      cursor: pointer; z-index: 25;
     }
 
-    /* Aviso para rotar el dispositivo si se quiere */
+    /* Hint inicial */
     #hint {
-      position: fixed;
-      right: 8px;
-      bottom: 8px;
-      font-size: 0.7rem;
-      opacity: 0.8;
-      z-index: 10;
+      position: fixed; bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.78rem; color: #c8e6c9;
+      text-align: center; z-index: 20;
+      max-width: 82vw;
     }
+
+    /* Scrollbar sutil */
+    #info-panel::-webkit-scrollbar { width: 4px; }
+    #info-panel::-webkit-scrollbar-thumb { background: #2e7d32; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <!-- Menú interactivo -->
-  <div id="menu">
-    <button data-park="simon">Simón Bolívar</button>
-    <button data-park="nacional">Parque Nacional</button>
-    <button data-park="tunal">Parque El Tunal</button>
-    <button data-section="info">Información</button>
-    <button data-section="historia">Historia</button>
-    <button data-section="cuidado">Cuidado ambiental</button>
-    <button data-section="normas">Normas</button>
-    <button data-section="seguridad">Seguridad</button>
-    <button data-section="quiz">Quiz</button>
+
+<!-- Botón QR siempre visible -->
+<button id="btn-qr">📱 QR</button>
+
+<!-- Menú principal -->
+<div id="menu">
+  <!-- Fila 1: Parques -->
+  <div id="park-row">
+    <button class="btn-park" data-park="simon">🌳 Simón Bolívar</button>
+    <button class="btn-park" data-park="nacional">🏛️ Parque Nacional</button>
+    <button class="btn-park" data-park="tunal">🌿 El Tunal</button>
   </div>
-
-  <!-- Botón temporal para pruebas de modelo -->
-  <button
-    id="boton-test-simon"
-    onclick="document.getElementById('parque-simon').setAttribute('visible', true)"
-    style="position:fixed; bottom:80px; left:10px; z-index:999; padding:10px 12px; background:#d32f2f; color:#fff; border:none; border-radius:8px; font-size:0.8rem;">
-    TEST: Mostrar Simón
-  </button>
-
-  <!-- Panel de información dinámico -->
-  <div id="info-panel">
-    <div id="info-title">Bogotá Verde AR</div>
-    <div id="info-body">
-      Apunta la cámara hacia el marcador impreso para ver el parque en realidad aumentada.
-    </div>
-
-    <!-- Sección de quiz (oculta hasta seleccionar Quiz) -->
-    <div id="quiz-options">
-      <button data-answer="a">a) Botar residuos en cualquier parte</button>
-      <button data-answer="b">b) Separar residuos y usar canecas</button>
-      <button data-answer="c">c) Alimentar a todos los animales</button>
-    </div>
-    <div id="quiz-feedback"></div>
+  <!-- Fila 2: Secciones -->
+  <div id="menu-row">
+    <button class="btn-sec" data-section="mapa">🗺️ Mapa</button>
+    <button class="btn-sec" data-section="info">ℹ️ Info</button>
+    <button class="btn-sec" data-section="historia">📜 Historia</button>
+    <button class="btn-sec" data-section="cuidado">♻️ Cuidado</button>
+    <button class="btn-sec" data-section="normas">📋 Normas</button>
+    <button class="btn-sec" data-section="seguridad">🔒 Seguridad</button>
+    <button class="btn-sec" data-section="quiz">🧠 Quiz</button>
   </div>
+</div>
 
-  <div id="hint">Gira el dispositivo y aléjate/un poco del marcador para ver mejor la escena.</div>
+<!-- Panel de información -->
+<div id="info-panel">
+  <div id="info-title">Bogotá Verde AR</div>
+  <div id="info-body">Apunta la cámara al marcador para comenzar la experiencia.</div>
+  <div id="quiz-options">
+    <button class="quiz-btn" data-answer="a">a) Botar residuos en cualquier lugar</button>
+    <button class="quiz-btn" data-answer="b">b) Usar las canecas de colores según el tipo de residuo</button>
+    <button class="quiz-btn" data-answer="c">c) Dejar bolsas en el césped</button>
+    <button class="quiz-btn" data-answer="d">d) Quemar la basura en el parque</button>
+  </div>
+  <div id="quiz-feedback"></div>
+</div>
 
-  <!-- Escena AR con MindAR + A-Frame -->
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind; uiScanning:no; uiLoading:no; uiError:no;"
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights: true"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    embedded
-  >
-    <a-assets timeout="10000">
-      <a-asset-item id="modelo-simon" src="./assets/modelos/parque-simon.glb"></a-asset-item>
-      <a-asset-item id="modelo-nacional" src="./assets/modelos/parque-nacional.glb"></a-asset-item>
-      <a-asset-item id="modelo-tunal" src="./assets/modelos/parque-tunal.glb"></a-asset-item>
-    </a-assets>
+<!-- Hint inicial -->
+<div id="hint">📷 Apunta la cámara al <strong>marcador impreso</strong> para iniciar la experiencia RA</div>
 
-    <!-- Cámara AR -->
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+<!-- Modal QR -->
+<div id="qr-overlay">
+  <div id="qr-box">
+    <div id="qrcode"></div>
+  </div>
+  <div id="qr-label">Escanea este QR para abrir <strong>Bogotá Verde AR</strong> en tu celular</div>
+  <button id="qr-close">Cerrar</button>
+</div>
 
-    <!-- Luz ambiental y direccional para el parque -->
-    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-    <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
+<!-- ─── ESCENA AR ─── -->
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind; uiScanning:no; uiLoading:no; uiError:no;"
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights: true"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+  embedded
+>
+  <a-assets timeout="15000">
+    <a-asset-item id="modelo-simon"    src="./assets/parque-simon.glb"></a-asset-item>
+    <a-asset-item id="modelo-nacional" src="./assets/parque-nacional.glb"></a-asset-item>
+    <a-asset-item id="modelo-tunal"    src="./assets/parque-tunal.glb"></a-asset-item>
+  </a-assets>
 
-    <!-- Contenido anclado al marcador (targetIndex: 0) -->
-    <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-entity light="type: ambient; intensity: 1.2"></a-entity>
+  <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
 
-      <!-- Parque Simón Bolívar -->
-      <a-entity id="parque-simon" visible="false">
-        <a-entity
-          id="modelo-simon-entity"
-          gltf-model="#modelo-simon"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="0.05 0.05 0.05"
-        ></a-entity>
-      </a-entity>
+  <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
 
-      <!-- Parque Nacional -->
-      <a-entity id="parque-nacional" visible="false">
-        <a-entity
-          id="modelo-nacional-entity"
-          gltf-model="#modelo-nacional"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="0.05 0.05 0.05"
-        ></a-entity>
-      </a-entity>
-
-      <!-- Parque El Tunal -->
-      <a-entity id="parque-tunal" visible="false">
-        <a-entity
-          id="modelo-tunal-entity"
-          gltf-model="#modelo-tunal"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="0.05 0.05 0.05"
-        ></a-entity>
-      </a-entity>
-
+    <!-- Parque Simón Bolívar -->
+    <a-entity id="parque-simon" visible="false">
+      <a-entity
+        id="modelo-simon-entity"
+        gltf-model="#modelo-simon"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.05 0.05 0.05"
+        animation__appear="property: scale; from: 0 0 0; to: 0.05 0.05 0.05; dur: 400; easing: easeOutBack; startEvents: aparecer"
+      ></a-entity>
     </a-entity>
-  </a-scene>
 
-  <script>
-    const infoTitle = document.getElementById("info-title");
-    const infoBody = document.getElementById("info-body");
-    const quizOptions = document.getElementById("quiz-options");
-    const quizFeedback = document.getElementById("quiz-feedback");
+    <!-- Parque Nacional -->
+    <a-entity id="parque-nacional" visible="false">
+      <a-entity
+        id="modelo-nacional-entity"
+        gltf-model="#modelo-nacional"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.05 0.05 0.05"
+        animation__appear="property: scale; from: 0 0 0; to: 0.05 0.05 0.05; dur: 400; easing: easeOutBack; startEvents: aparecer"
+      ></a-entity>
+    </a-entity>
 
-    const parks = {
-      simon: document.getElementById("parque-simon"),
-      nacional: document.getElementById("parque-nacional"),
-      tunal: document.getElementById("parque-tunal")
-    };
+    <!-- Parque El Tunal -->
+    <a-entity id="parque-tunal" visible="false">
+      <a-entity
+        id="modelo-tunal-entity"
+        gltf-model="#modelo-tunal"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.05 0.05 0.05"
+        animation__appear="property: scale; from: 0 0 0; to: 0.05 0.05 0.05; dur: 400; easing: easeOutBack; startEvents: aparecer"
+      ></a-entity>
+    </a-entity>
 
-    const parkInfo = {
-      simon: {
-        title: "Parque Simón Bolívar",
-        body: "Uno de los parques más representativos de Bogotá. Es reconocido por sus zonas verdes, lago, espacios para recreación y grandes eventos."
-      },
-      nacional: {
-        title: "Parque Nacional",
-        body: "Espacio tradicional de la ciudad, con valor histórico, cultural y ambiental. Es ideal para caminar, descansar y encontrarse con la naturaleza."
-      },
-      tunal: {
-        title: "Parque El Tunal",
-        body: "Parque urbano importante del sur de Bogotá, con áreas para deporte, recreación y actividades en familia."
-      }
-    };
+  </a-entity>
+</a-scene>
 
-    const sections = {
-      info: {
-        title: "Información del lugar",
-        body: "Selecciona un parque desde el menú para visualizarlo en realidad aumentada."
-      },
-      historia: {
-        title: "Historia y cultura ciudadana",
-        body: "Los parques de Bogotá son espacios clave para la cultura, los conciertos, ferias y encuentros ciudadanos. Promueven el respeto y la convivencia."
-      },
-      cuidado: {
-        title: "Cuidado ambiental",
-        body: "Usa las canecas de colores para separar residuos, cuida el césped y los árboles, respeta la fauna urbana y evita generar ruido excesivo."
-      },
-      normas: {
-        title: "Normas de uso del espacio público",
-        body: "Respeta las zonas peatonales, no dañes el mobiliario, controla tus mascotas, usa las ciclorrutas correctamente y evita actividades que deterioren el parque."
-      },
-      seguridad: {
-        title: "Recomendaciones de seguridad",
-        body: "Cuida tus objetos personales, no permanezcas en zonas solas en la noche, sigue la señalización e identifica puntos de encuentro con tus acompañantes."
-      },
-      quiz: {
-        title: "Quiz: cuidado del parque",
-        body: "¿Cuál de estas acciones es la más adecuada para cuidar el parque?"
-      }
-    };
+<script>
+// ─── Datos de secciones por parque ───
+const contenido = {
+  simon: {
+    nombre: "Parque Simón Bolívar",
+    mapa: "Ubicado en la localidad de Teusaquillo, entre la Av. El Dorado y la Calle 63. Es el parque metropolitano más grande de Bogotá con 113 hectáreas. Puedes llegar por TransMilenio en las estaciones Av. El Dorado o caminando desde el CAN.",
+    info: "El Parque Simón Bolívar cuenta con lago para canotaje y bicicletas acuáticas, ciclovías, canchas de fútbol y voleibol, zona de atletismo, zona de comidas, anfiteatro al aire libre, jardín botánico cercano y amplias zonas verdes para picnic y descanso.",
+    historia: "Inaugurado en 1968 para los Juegos Olímpicos de América del Sur, el parque fue diseñado por el arquitecto paisajista Enrique Triana. Ha sido escenario de conciertos históricos como el de Los Rolling Stones (1995) y el Festival Estéreo Picnic. Es símbolo de identidad bogotana y espacio cultural de la ciudad.",
+    cuidado: "Este parque alberga más de 200 especies de aves y fauna urbana. Usa siempre las canecas de colores: verde para orgánicos, gris para no reciclables y azul para reciclables. No alimentes a las palomas ni patos, ya que puede generar dependencia y enfermedades. Cuida el lago: no arrojes residuos al agua.",
+    normas: "Está prohibido ingresar con vehículos motorizados al interior del parque. Las mascotas deben ir con correa y debes recoger sus desechos. No está permitido acampar ni encender fogatas. El consumo de bebidas alcohólicas está regulado y no se permite en zonas de niños. Respeta la señalización de las ciclovías.",
+    seguridad: "El parque cuenta con CAI (Centro de Atención Inmediata) en la entrada principal. Punto de encuentro de emergencia: carpa principal junto al lago. Evita ingresar a zonas boscosas solo en horas nocturnas. Guarda tus objetos de valor y no muestres dispositivos costosos. Ante una emergencia llama al 123."
+  },
+  nacional: {
+    nombre: "Parque Nacional Enrique Olaya Herrera",
+    mapa: "Localizado en la Carrera 7 con Calle 36 al 39, entre los barrios La Merced y Bosque Izquierdo, en la localidad de Chapinero. Acceso por TransMilenio en la estación Calle 45 o caminando desde La Candelaria.",
+    info: "El Parque Nacional ofrece canchas de tenis, piscinas públicas, pista de patinaje, zonas de atletismo, áreas de picnic con mesas y asadores, cafetería, baños públicos, juegos infantiles y un hermoso diseño paisajístico con senderos arbolados. Es ideal para deporte y familia.",
+    historia: "Inaugurado en 1934 por el presidente Enrique Olaya Herrera, es uno de los parques más antiguos y representativos de Bogotá. Fue diseñado por el arquitecto Karl Brunner con influencia del urbanismo europeo. Tiene valor histórico y cultural como espacio de convivencia ciudadana desde hace más de 90 años.",
+    cuidado: "El parque posee una importante arborización con árboles nativos como el nogal, el cedro y el urapán. No dañes la corteza de los árboles ni cortes ramas. Usa únicamente las zonas de asadores designadas. Recoge todos tus residuos y deposítalos en las canecas correspondientes. Cuida el agua de las fuentes ornamentales.",
+    normas: "No está permitido el ingreso de bicicletas en zonas peatonales exclusivas. Las canchas deportivas tienen horarios asignados y requieren reserva previa. No está permitido el consumo de sustancias psicoactivas. Respeta el derecho de otras personas al descanso: no uses equipos de sonido a alto volumen.",
+    seguridad: "El parque tiene vigilancia de la Policía Metropolitana en horario de 6am a 10pm. Punto de encuentro de emergencia: frente a la entrada principal por la Carrera 7. Reporta actividades sospechosas al 123. No dejes objetos personales sin supervisión. Los menores de edad deben estar siempre acompañados de adultos."
+  },
+  tunal: {
+    nombre: "Parque Metropolitano El Tunal",
+    mapa: "Ubicado en la Autopista Sur con Carrera 20, localidad de Tunjuelito, sur de Bogotá. Acceso por TransMilenio en la estación El Tunal, una de las estaciones terminales de la troncal NQS.",
+    info: "El Parque El Tunal cuenta con estadio de fútbol (Estadio El Campín del sur), velódromo, pista de atletismo, piscinas, canchas múltiples, zona de skate, biblioteca pública, centro comercial El Tunal adjunto, zonas verdes amplias y áreas de recreación para todas las edades.",
+    historia: "Construido en los años 70 en el marco de la expansión urbana del sur de Bogotá, El Tunal nació como respuesta a la necesidad de espacios recreativos en las localidades del sur. Se convirtió en el principal parque metropolitano del sur de la ciudad, siendo referente cultural y deportivo para localidades como Tunjuelito, Ciudad Bolívar y Rafael Uribe.",
+    cuidado: "El parque atraviesa el río Tunjuelo, importante afluente del río Bogotá. Es fundamental no arrojar residuos al río ni a sus orillas. Respeta y cuida la vegetación nativa plantada como parte de proyectos de restauración ecológica. Reporta cualquier vertimiento o contaminación al acueducto de Bogotá: línea 116.",
+    normas: "El uso del velódromo y la pista de atletismo requiere inscripción previa en el IDRD. Las zonas de piscinas tienen horarios y tarifas específicas. No está permitido ingresar con mascotas a zonas de piscinas y canchas cerradas. Respeta los horarios del parque: 5am a 9pm. El ingreso de vehículos está restringido a zonas de parqueadero.",
+    seguridad: "El parque cuenta con CAI permanente y cámaras de videovigilancia. Punto de encuentro: entrada principal por la Autopista Sur. La zona aledaña al parque requiere precaución en horarios nocturnos. Guarda tus pertenencias y evita mostrar dispositivos electrónicos de valor. En emergencias: 123."
+  }
+};
 
-    function hideAllParks() {
-      Object.values(parks).forEach((park) => {
-        park.setAttribute("visible", "false");
+// Quiz por parque
+const quizzes = {
+  simon: {
+    pregunta: "¿Cuál de estas acciones cuida mejor el Parque Simón Bolívar?",
+    opciones: [
+      { id: "a", texto: "a) Arrojar residuos al lago" },
+      { id: "b", texto: "b) Usar canecas de colores según el tipo de residuo", correcta: true },
+      { id: "c", texto: "c) Alimentar a los patos con pan" },
+      { id: "d", texto: "d) Cortar flores del jardín para llevar a casa" }
+    ]
+  },
+  nacional: {
+    pregunta: "¿Qué debes hacer si llevas mascotas al Parque Nacional?",
+    opciones: [
+      { id: "a", texto: "a) Soltarlas para que corran libremente" },
+      { id: "b", texto: "b) Dejarlas sin agua para que no orinen" },
+      { id: "c", texto: "c) Llevarlas con correa y recoger sus desechos", correcta: true },
+      { id: "d", texto: "d) Ingresarlas a las piscinas" }
+    ]
+  },
+  tunal: {
+    pregunta: "¿Por qué es importante no arrojar residuos al río Tunjuelo en El Tunal?",
+    opciones: [
+      { id: "a", texto: "a) Porque el río ya está contaminado de todas formas" },
+      { id: "b", texto: "b) Porque contamina el agua que llega al río Bogotá y afecta los ecosistemas", correcta: true },
+      { id: "c", texto: "c) Porque está prohibido solo los domingos" },
+      { id: "d", texto: "d) Porque huele mal" }
+    ]
+  }
+};
+
+// ─── Referencias DOM ───
+const menuEl     = document.getElementById("menu");
+const panelEl    = document.getElementById("info-panel");
+const titleEl    = document.getElementById("info-title");
+const bodyEl     = document.getElementById("info-body");
+const quizOpts   = document.getElementById("quiz-options");
+const quizFb     = document.getElementById("quiz-feedback");
+const hintEl     = document.getElementById("hint");
+
+const parks = {
+  simon:    document.getElementById("parque-simon"),
+  nacional: document.getElementById("parque-nacional"),
+  tunal:    document.getElementById("parque-tunal")
+};
+
+const modelEntities = {
+  simon:    document.getElementById("modelo-simon-entity"),
+  nacional: document.getElementById("modelo-nacional-entity"),
+  tunal:    document.getElementById("modelo-tunal-entity")
+};
+
+let parqueActivo = null;
+let seccionActiva = null;
+
+// ─── Escala fija al cargar el modelo ───
+["simon","nacional","tunal"].forEach(key => {
+  const el = modelEntities[key];
+  if (!el) return;
+  el.addEventListener("model-loaded", function () {
+    console.log("Modelo cargado: " + key);
+  });
+});
+
+// ─── Ocultar todos los parques ───
+function ocultarParques() {
+  Object.values(parks).forEach(p => p.setAttribute("visible", false));
+  document.querySelectorAll(".btn-park").forEach(b => b.classList.remove("activo"));
+}
+
+// ─── Mostrar parque con animación ───
+function mostrarParque(key) {
+  ocultarParques();
+  parks[key].setAttribute("visible", true);
+  // Disparar animación de aparición
+  setTimeout(() => {
+    modelEntities[key].emit("aparecer");
+  }, 50);
+  parqueActivo = key;
+  document.querySelector(`[data-park="${key}"]`).classList.add("activo");
+
+  // Mostrar info del parque automáticamente
+  mostrarSeccion("info", key);
+}
+
+// ─── Mostrar sección de información ───
+function mostrarSeccion(sec, parkKey) {
+  const pk = parkKey || parqueActivo;
+  seccionActiva = sec;
+
+  document.querySelectorAll(".btn-sec").forEach(b => b.classList.remove("activo"));
+  const btnSec = document.querySelector(`[data-section="${sec}"]`);
+  if (btnSec) btnSec.classList.add("activo");
+
+  quizOpts.style.display = "none";
+  quizFb.textContent = "";
+
+  if (!pk) {
+    titleEl.textContent = "Selecciona un parque";
+    bodyEl.textContent = "Elige uno de los parques del menú para ver su información.";
+    return;
+  }
+
+  const d = contenido[pk];
+  if (!d) return;
+
+  switch(sec) {
+    case "mapa":
+      titleEl.textContent = "🗺️ Mapa — " + d.nombre;
+      bodyEl.textContent = d.mapa; break;
+    case "info":
+      titleEl.textContent = "ℹ️ " + d.nombre;
+      bodyEl.textContent = d.info; break;
+    case "historia":
+      titleEl.textContent = "📜 Historia — " + d.nombre;
+      bodyEl.textContent = d.historia; break;
+    case "cuidado":
+      titleEl.textContent = "♻️ Cuidado ambiental — " + d.nombre;
+      bodyEl.textContent = d.cuidado; break;
+    case "normas":
+      titleEl.textContent = "📋 Normas de uso — " + d.nombre;
+      bodyEl.textContent = d.normas; break;
+    case "seguridad":
+      titleEl.textContent = "🔒 Seguridad — " + d.nombre;
+      bodyEl.textContent = d.seguridad; break;
+    case "quiz":
+      const q = quizzes[pk];
+      titleEl.textContent = "🧠 Quiz — " + d.nombre;
+      bodyEl.textContent = q.pregunta;
+      // Generar opciones del quiz dinámicamente
+      quizOpts.innerHTML = "";
+      q.opciones.forEach(op => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-btn";
+        btn.setAttribute("data-answer", op.id);
+        btn.setAttribute("data-correct", op.correcta ? "true" : "false");
+        btn.textContent = op.texto;
+        btn.addEventListener("click", responderQuiz);
+        quizOpts.appendChild(btn);
       });
+      quizOpts.style.display = "flex";
+      break;
+  }
+}
+
+// ─── Quiz ───
+function responderQuiz(e) {
+  const correcta = e.currentTarget.getAttribute("data-correct") === "true";
+  document.querySelectorAll(".quiz-btn").forEach(b => b.disabled = true);
+  if (correcta) {
+    quizFb.textContent = "✅ ¡Correcto! Gracias por cuidar los parques de Bogotá.";
+    quizFb.style.color = "#69f0ae";
+    e.currentTarget.style.background = "#1b5e20";
+  } else {
+    quizFb.textContent = "❌ Incorrecto. Reflexiona sobre cómo tus acciones impactan el medio ambiente.";
+    quizFb.style.color = "#ef9a9a";
+    e.currentTarget.style.background = "#5c1010";
+    // Resaltar correcta
+    document.querySelectorAll(".quiz-btn").forEach(b => {
+      if (b.getAttribute("data-correct") === "true") b.style.background = "#1b5e20";
+    });
+  }
+}
+
+// ─── Botones de parque ───
+document.querySelectorAll(".btn-park").forEach(btn => {
+  btn.addEventListener("click", () => mostrarParque(btn.getAttribute("data-park")));
+});
+
+// ─── Botones de sección ───
+document.querySelectorAll(".btn-sec").forEach(btn => {
+  btn.addEventListener("click", () => mostrarSeccion(btn.getAttribute("data-section")));
+});
+
+// ─── Eventos MindAR targetFound / targetLost ───
+document.addEventListener("DOMContentLoaded", () => {
+  const target = document.getElementById("ar-target");
+  if (!target) return;
+
+  target.addEventListener("targetFound", () => {
+    menuEl.style.display = "flex";
+    panelEl.style.display = "block";
+    hintEl.style.display = "none";
+    if (!parqueActivo) {
+      titleEl.textContent = "🌳 Bogotá Verde AR";
+      bodyEl.textContent = "¡Marcador detectado! Selecciona un parque del menú para visualizarlo en realidad aumentada.";
     }
+  });
 
-    function showPark(parkKey) {
-      hideAllParks();
-      parks[parkKey].setAttribute("visible", "true");
-      infoTitle.textContent = parkInfo[parkKey].title;
-      infoBody.textContent = parkInfo[parkKey].body;
-      quizOptions.style.display = "none";
-      quizFeedback.textContent = "";
-    }
+  target.addEventListener("targetLost", () => {
+    menuEl.style.display = "none";
+    panelEl.style.display = "none";
+    hintEl.style.display = "block";
+    ocultarParques();
+    parqueActivo = null;
+  });
+});
 
-    document.querySelectorAll("#menu button").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const park = btn.getAttribute("data-park");
-        const section = btn.getAttribute("data-section");
+// ─── QR ───
+const btnQR = document.getElementById("btn-qr");
+const qrOverlay = document.getElementById("qr-overlay");
+const qrClose = document.getElementById("qr-close");
+let qrGenerado = false;
 
-        if (park) {
-          showPark(park);
-          return;
-        }
-
-        if (section) {
-          const data = sections[section];
-          infoTitle.textContent = data.title;
-          infoBody.textContent = data.body;
-
-          if (section === "quiz") {
-            quizOptions.style.display = "flex";
-            quizFeedback.textContent = "";
-          } else {
-            quizOptions.style.display = "none";
-            quizFeedback.textContent = "";
-          }
-        }
-      });
+btnQR.addEventListener("click", () => {
+  qrOverlay.classList.add("visible");
+  if (!qrGenerado) {
+    new QRCode(document.getElementById("qrcode"), {
+      text: window.location.href,
+      width: 200, height: 200,
+      colorDark: "#0a1a0a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
     });
+    qrGenerado = true;
+  }
+});
 
-    quizOptions.querySelectorAll("button").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const answer = btn.getAttribute("data-answer");
-        if (answer === "b") {
-          quizFeedback.textContent = "✅ Correcto: separar residuos y usar canecas ayuda a cuidar el parque.";
-          quizFeedback.style.color = "#81c784";
-        } else {
-          quizFeedback.textContent = "❌ Revisa de nuevo. Piensa en cómo tus acciones impactan el medio ambiente.";
-          quizFeedback.style.color = "#ef9a9a";
-        }
-      });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const target = document.getElementById("ar-target");
-      const menuEl = document.getElementById("menu");
-      const infoPanelEl = document.getElementById("info-panel");
-
-      if (!target) return;
-
-      target.addEventListener("targetFound", () => {
-        menuEl.style.display = "flex";
-        infoPanelEl.style.display = "block";
-        infoTitle.textContent = "Bogotá Verde AR";
-        infoBody.textContent = "Selecciona un parque desde el menú para visualizarlo en realidad aumentada.";
-        hideAllParks();
-      });
-
-      target.addEventListener("targetLost", () => {
-        menuEl.style.display = "none";
-        infoPanelEl.style.display = "none";
-        hideAllParks();
-      });
-    });
-  </script>
+qrClose.addEventListener("click", () => qrOverlay.classList.remove("visible"));
+qrOverlay.addEventListener("click", e => {
+  if (e.target === qrOverlay) qrOverlay.classList.remove("visible");
+});
+</script>
 </body>
 </html>
