@@ -185,30 +185,33 @@
       <!-- Parque Simón Bolívar -->
       <a-entity id="parque-simon" visible="false">
         <a-entity
+          id="modelo-simon-entity"
           gltf-model="#modelo-simon"
-          position="0 0.05 0"
+          position="0 0 0"
           rotation="0 180 0"
-          scale="0.5 0.5 0.5"
+          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
       <!-- Parque Nacional -->
       <a-entity id="parque-nacional" visible="false">
         <a-entity
+          id="modelo-nacional-entity"
           gltf-model="#modelo-nacional"
-          position="0 0.05 0"
+          position="0 0 0"
           rotation="0 180 0"
-          scale="0.5 0.5 0.5"
+          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
       <!-- Parque El Tunal -->
       <a-entity id="parque-tunal" visible="false">
         <a-entity
+          id="modelo-tunal-entity"
           gltf-model="#modelo-tunal"
-          position="0 0.05 0"
+          position="0 0 0"
           rotation="0 180 0"
-          scale="0.5 0.5 0.5"
+          scale="0.001 0.001 0.001"
         ></a-entity>
       </a-entity>
 
@@ -320,6 +323,29 @@
           quizFeedback.textContent = "❌ Revisa de nuevo. Piensa en cómo tus acciones impactan el medio ambiente.";
           quizFeedback.style.color = "#ef9a9a";
         }
+      });
+    });
+
+    document.querySelectorAll("[gltf-model]").forEach(function (el) {
+      el.addEventListener("model-loaded", function () {
+        const object3D = el.getObject3D("mesh");
+        if (!object3D) return;
+
+        const box = new THREE.Box3().setFromObject(object3D);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const targetSize = 0.5;
+        const scaleFactor = targetSize / maxDim;
+
+        el.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        el.setAttribute("position", `${-center.x * scaleFactor} ${-center.y * scaleFactor} 0`);
+
+        console.log(`Modelo escalado a factor: ${scaleFactor}`);
       });
     });
 
